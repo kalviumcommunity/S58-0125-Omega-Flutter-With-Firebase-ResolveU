@@ -14,12 +14,12 @@
 ---
 
 ## ✨ Features
-- 🔐 *Secure Authentication* – Student login/signup with email verification  
-- 📝 *Easy Issue Reporting* – Quick form submission with categories (Mess / Maintenance / Facilities) and urgency levels  
-- 📊 *Live Dashboard* – Real-time tracking of issue status (Pending → In Progress → Resolved)  
+- 🔐 *Secure Authentication* – Student login/signup with email verification.
+- 📝 *Easy Issue Reporting* – Quick form submission with categories (Mess / Maintenance / Facilities) and urgency levels.  
+- 📊 *Live Dashboard* – Real-time tracking of issue status (Pending → In Progress → Resolved).  
 - 👨‍💼 *Admin Panel* – Dedicated interface for hostel staff to manage and update issues  
-- 🔔 *Push Notifications* – Instant updates when issue status changes  
-- 📱 *Clean UI* – Simple, intuitive interface optimized for hostel residents  
+- 🔔 *Push Notifications* – Instant updates when issue status changes.  
+- 📱 *Clean UI* – Simple, intuitive interface optimized for hostel residents.  
 
 ---
 
