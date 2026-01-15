@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "116193289030",
+    "project_id": "resolveu-69469",
+    "storage_bucket": "resolveu-69469.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:116193289030:android:3838019a2ecdfe055dfb47",
+        "android_client_info": {
+          "package_name": "ResolveU.apk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFcjt6F6y5kgbljw7unsqsUh4M00AA9u0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:116193289030:android:cb5a9e4dd449a63b5dfb47",
+        "android_client_info": {
+          "package_name": "com.example.resolveu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFcjt6F6y5kgbljw7unsqsUh4M00AA9u0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
