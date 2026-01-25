@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/issue.dart';
 
 class FirestoreService {
@@ -9,8 +10,20 @@ class FirestoreService {
     try {
       await _issuesCollection.doc(issue.id).set(issue.toMap());
     } catch (e) {
-      print('Error adding issue: $e');
+      debugPrint('Error adding issue: $e');
       rethrow;
     }
+  }
+
+  Stream<List<Issue>> getIssuesByUserId(String userId) {
+    return _issuesCollection
+        .where('userId', isEqualTo: userId)
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return Issue.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+      }).toList();
+    });
   }
 }

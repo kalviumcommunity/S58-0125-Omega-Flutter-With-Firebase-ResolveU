@@ -1,5 +1,6 @@
 class Issue {
   final String id;
+  final String userId;
   final String title;
   final String description;
   final String category;
@@ -9,6 +10,7 @@ class Issue {
 
   Issue({
     required this.id,
+    required this.userId,
     required this.title,
     required this.description,
     required this.category,
@@ -20,6 +22,7 @@ class Issue {
   factory Issue.fromMap(Map<String, dynamic> map, String id) {
     return Issue(
       id: id,
+      userId: map['userId'] ?? '',
       title: map['title'] ?? '',
       description: map['description'] ?? '',
       category: map['category'] ?? '',
@@ -31,6 +34,7 @@ class Issue {
 
   Map<String, dynamic> toMap() {
     return {
+      'userId': userId,
       'title': title,
       'description': description,
       'category': category,

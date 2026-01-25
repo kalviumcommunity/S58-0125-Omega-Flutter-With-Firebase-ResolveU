@@ -12,227 +12,120 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String _selectedCategory = 'All';
-  String _selectedStatus = 'All';
-
-  // Mock data for demonstration
-  final List<Map<String, dynamic>> _mockIssues = [
-    {
-      'title': 'Broken Tap in Washroom',
-      'category': 'Maintenance',
-      'urgency': 'High',
-      'status': 'Pending',
-      'timestamp': DateTime.now().subtract(const Duration(hours: 2)),
-    },
-    {
-      'title': 'Poor Food Quality',
-      'category': 'Mess',
-      'urgency': 'Medium',
-      'status': 'In Progress',
-      'timestamp': DateTime.now().subtract(const Duration(days: 1)),
-    },
-    {
-      'title': 'WiFi Not Working',
-      'category': 'Facilities',
-      'urgency': 'High',
-      'status': 'Resolved',
-      'timestamp': DateTime.now().subtract(const Duration(days: 3)),
-    },
-  ];
-
-  Color _getUrgencyColor(String urgency) {
-    switch (urgency) {
-      case 'High':
-        return Colors.red;
-      case 'Medium':
-        return Colors.orange;
-      case 'Low':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Resolved':
-        return Colors.green;
-      case 'In Progress':
-        return Colors.blue;
-      case 'Pending':
-        return Colors.orange;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  List<Map<String, dynamic>> _getFilteredIssues() {
-    return _mockIssues.where((issue) {
-      final categoryMatch = _selectedCategory == 'All' || issue['category'] == _selectedCategory;
-      final statusMatch = _selectedStatus == 'All' || issue['status'] == _selectedStatus;
-      return categoryMatch && statusMatch;
-    }).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    final filteredIssues = _getFilteredIssues();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('HostelSync'),
+        title: const Text('HostelSync', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        elevation: 0,
         automaticallyImplyLeading: false,
         actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.account_circle),
-            onSelected: (value) async {
-              if (value == 'profile') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                );
-              } else if (value == 'logout') {
-                await FirebaseAuth.instance.signOut();
-                if (context.mounted) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                        builder: (context) => const LoginPage()),
-                  );
-                }
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
-                value: 'profile',
-                child: Row(
-                  children: [
-                    Icon(Icons.person, color: Colors.black54),
-                    SizedBox(width: 8),
-                    Text('Profile'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout, color: Colors.black54),
-                    SizedBox(width: 8),
-                    Text('Logout'),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          _buildProfileMenu(context),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Welcome Section
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            color: Colors.grey[100],
-            width: double.infinity,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Welcome, ${user?.email?.split('@')[0] ?? 'User'}',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Welcome Section with Gradient
+            Container(
+              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 40, top: 20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Theme.of(context).colorScheme.inversePrimary,
+                    Theme.of(context).colorScheme.surface,
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Track and manage hostel issues',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                ),
-              ],
-            ),
-          ),
-
-          // Quick Stats
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStatCard('Total', _mockIssues.length.toString(), Colors.blue),
-                _buildStatCard('Pending', _mockIssues.where((i) => i['status'] == 'Pending').length.toString(), Colors.orange),
-                _buildStatCard('Resolved', _mockIssues.where((i) => i['status'] == 'Resolved').length.toString(), Colors.green),
-              ],
-            ),
-          ),
-
-          // Filters
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedCategory,
-                    decoration: const InputDecoration(
-                      labelText: 'Category',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    items: ['All', 'Mess', 'Maintenance', 'Facilities']
-                        .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedCategory = value!;
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedStatus,
-                    decoration: const InputDecoration(
-                      labelText: 'Status',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    items: ['All', 'Pending', 'In Progress', 'Resolved']
-                        .map((status) => DropdownMenuItem(value: status, child: Text(status)))
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedStatus = value!;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Issue List
-          Expanded(
-            child: filteredIssues.isEmpty
-                ? _buildEmptyState()
-                : RefreshIndicator(
-                    onRefresh: () async {
-                      await Future.delayed(const Duration(seconds: 1));
-                      setState(() {});
-                    },
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      itemCount: filteredIssues.length,
-                      itemBuilder: (context, index) {
-                        final issue = filteredIssues[index];
-                        return _buildIssueCard(issue);
-                      },
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Welcome back, ${user?.email?.split('@')[0] ?? 'Student'}! 👋',
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
                     ),
                   ),
-          ),
-        ],
+                  const SizedBox(height: 8),
+                  Text(
+                    'Have an issue? We are here to resolve it.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[700],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'About HostelSync',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildInfoCard(
+                    context,
+                    icon: Icons.apartment,
+                    title: 'Your Home Away From Home',
+                    description:
+                        'HostelSync is dedicated to providing a comfortable and safe living environment for all students. We strive to maintain high standards of cleanliness and facility management.',
+                  ),
+
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Community Guidelines',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildInfoCard(
+                    context,
+                    icon: Icons.volume_off,
+                    title: 'Quiet Hours',
+                    description:
+                        'Please respect quiet hours from 10:00 PM to 7:00 AM to ensure everyone gets a good night\'s rest.',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildInfoCard(
+                    context,
+                    icon: Icons.cleaning_services,
+                    title: 'Cleanliness',
+                    description:
+                        'Help us keep the hostel clean. Please dispose of trash in designated bins and report any maintenance issues promptly.',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildInfoCard(
+                    context,
+                    icon: Icons.security,
+                    title: 'Safety',
+                    description:
+                        'Do not share your access card or keys. Report any suspicious activity to the administration immediately.',
+                  ),
+                ],
+              ),
+            ),
+             const SizedBox(height: 80), // Space for FAB
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -241,132 +134,118 @@ class _HomePageState extends State<HomePage> {
             MaterialPageRoute(builder: (context) => const ReportIssueScreen()),
           );
         },
-        icon: const Icon(Icons.add),
+        icon: const Icon(Icons.add_comment_rounded),
         label: const Text('Report Issue'),
+        elevation: 4,
       ),
     );
   }
 
-  Widget _buildStatCard(String label, String value, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+  Widget _buildProfileMenu(BuildContext context) {
+    return PopupMenuButton<String>(
+      icon: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+        ),
+        child: const Icon(Icons.person_outline),
       ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      onSelected: (value) async {
+        if (value == 'profile') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ProfileScreen()),
+          );
+        } else if (value == 'logout') {
+          await FirebaseAuth.instance.signOut();
+          if (context.mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+            );
+          }
+        }
+      },
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+        const PopupMenuItem<String>(
+          value: 'profile',
+          child: Row(
+            children: [
+              Icon(Icons.person, color: Colors.black54),
+              SizedBox(width: 12),
+              Text('My Profile'),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+        ),
+        const PopupMenuDivider(),
+        const PopupMenuItem<String>(
+          value: 'logout',
+          child: Row(
+            children: [
+              Icon(Icons.logout, color: Colors.redAccent),
+              SizedBox(width: 12),
+              Text('Logout', style: TextStyle(color: Colors.redAccent)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoCard(BuildContext context,
+      {required IconData icon, required String title, required String description}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
       ),
-    );
-  }
-
-  Widget _buildIssueCard(Map<String, dynamic> issue) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(12),
-        title: Text(
-          issue['title'],
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
-            Row(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.4),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Theme.of(context).colorScheme.primary),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildChip(issue['category'], Colors.blue),
-                const SizedBox(width: 8),
-                _buildChip(issue['urgency'], _getUrgencyColor(issue['urgency'])),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    height: 1.4,
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              _formatTimestamp(issue['timestamp']),
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-            ),
-          ],
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: _getStatusColor(issue['status']).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: _getStatusColor(issue['status'])),
-          ),
-          child: Text(
-            issue['status'],
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: _getStatusColor(issue['status']),
-            ),
-          ),
-        ),
-        onTap: () {
-          // Navigate to issue details
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('View details for: ${issue['title']}')),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildChip(String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w500),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          Text(
-            'No issues found',
-            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Tap the + button to report an issue',
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
           ),
         ],
       ),
     );
-  }
-
-  String _formatTimestamp(DateTime timestamp) {
-    final diff = DateTime.now().difference(timestamp);
-    if (diff.inDays > 0) {
-      return '${diff.inDays} day${diff.inDays > 1 ? 's' : ''} ago';
-    } else if (diff.inHours > 0) {
-      return '${diff.inHours} hour${diff.inHours > 1 ? 's' : ''} ago';
-    } else {
-      return '${diff.inMinutes} min ago';
-    }
   }
 }
