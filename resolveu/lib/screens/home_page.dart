@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_page.dart';
+import 'report_issue_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -204,9 +205,9 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Navigate to add issue page
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Add Issue page coming soon!')),
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ReportIssueScreen()),
           );
         },
         icon: const Icon(Icons.add),
