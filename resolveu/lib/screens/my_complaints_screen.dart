@@ -5,8 +5,22 @@ import '../models/issue.dart';
 import '../services/firestore_service.dart';
 import 'report_issue_screen.dart';
 
-class MyComplaintsScreen extends StatelessWidget {
+enum SortOption {
+  newestFirst,
+  oldestFirst,
+  urgencyHighToLow,
+  urgencyLowToHigh,
+}
+
+class MyComplaintsScreen extends StatefulWidget {
   const MyComplaintsScreen({super.key});
+
+  @override
+  State<MyComplaintsScreen> createState() => _MyComplaintsScreenState();
+}
+
+class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
+  SortOption _currentSortOption = SortOption.newestFirst;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +39,36 @@ class MyComplaintsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('My Complaints'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          PopupMenuButton<SortOption>(
+            icon: const Icon(Icons.sort),
+            tooltip: 'Sort Options',
+            onSelected: (SortOption result) {
+              setState(() {
+                _currentSortOption = result;
+              });
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<SortOption>>[
+              const PopupMenuItem<SortOption>(
+                value: SortOption.newestFirst,
+                child: Text('Newest First'),
+              ),
+              const PopupMenuItem<SortOption>(
+                value: SortOption.oldestFirst,
+                child: Text('Oldest First'),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem<SortOption>(
+                value: SortOption.urgencyHighToLow,
+                child: Text('Urgency: High to Low'),
+              ),
+              const PopupMenuItem<SortOption>(
+                value: SortOption.urgencyLowToHigh,
+                child: Text('Urgency: Low to High'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: StreamBuilder<List<Issue>>(
         stream: firestoreService.getIssuesByUserId(user.uid),
@@ -37,11 +81,25 @@ class MyComplaintsScreen extends StatelessWidget {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-          final issues = snapshot.data ?? [];
+          List<Issue> issues = snapshot.data ?? [];
 
           if (issues.isEmpty) {
             return _buildEmptyState(context);
           }
+
+          // Apply Client-side Sorting
+          issues.sort((a, b) {
+            switch (_currentSortOption) {
+              case SortOption.newestFirst:
+                return b.timestamp.compareTo(a.timestamp);
+              case SortOption.oldestFirst:
+                return a.timestamp.compareTo(b.timestamp);
+              case SortOption.urgencyHighToLow:
+                return _compareUrgency(b.urgency, a.urgency); // Higher urgency first
+              case SortOption.urgencyLowToHigh:
+                return _compareUrgency(a.urgency, b.urgency); // Lower urgency first
+            }
+          });
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -53,6 +111,20 @@ class MyComplaintsScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  int _compareUrgency(String urgencyA, String urgencyB) {
+    final urgencyLevel = {
+      'Critical': 3,
+      'High': 2,
+      'Medium': 1,
+      'Low': 0,
+    };
+
+    int levelA = urgencyLevel[urgencyA] ?? -1;
+    int levelB = urgencyLevel[urgencyB] ?? -1;
+
+    return levelA.compareTo(levelB);
   }
 
   Widget _buildEmptyState(BuildContext context) {
