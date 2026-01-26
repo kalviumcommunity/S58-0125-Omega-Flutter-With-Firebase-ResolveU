@@ -35,4 +35,13 @@ class FirestoreService {
       }).toList();
     });
   }
+
+  Future<void> deleteIssue(String issueId) async {
+    try {
+      await _issuesCollection.doc(issueId).delete();
+    } catch (e) {
+      debugPrint('Error deleting issue: $e');
+      rethrow;
+    }
+  }
 }

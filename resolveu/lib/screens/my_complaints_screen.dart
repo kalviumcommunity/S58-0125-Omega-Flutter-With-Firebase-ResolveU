@@ -112,6 +112,11 @@ class MyComplaintsScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   _buildStatusChip(issue.status),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                    onPressed: () => _confirmDelete(context, issue.id),
+                    tooltip: 'Delete Complaint',
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -155,6 +160,44 @@ class MyComplaintsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, String issueId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Complaint'),
+        content: const Text('Are you sure you want to permanently delete this complaint? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await FirestoreService().deleteIssue(issueId);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Complaint deleted successfully')),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error deleting complaint: $e')),
+          );
+        }
+      }
+    }
   }
 
   Widget _buildStatusChip(String status) {
