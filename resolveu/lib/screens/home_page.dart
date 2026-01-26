@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'login_page.dart';
 import 'report_issue_screen.dart';
 import 'profile_screen.dart';
+import '../theme_manager.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -59,7 +60,7 @@ class _HomePageState extends State<HomePage> {
                     'Have an issue? We are here to resolve it.',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.grey[700],
+                      color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -158,6 +159,8 @@ class _HomePageState extends State<HomePage> {
             context,
             MaterialPageRoute(builder: (context) => const ProfileScreen()),
           );
+        } else if (value == 'theme') {
+          ThemeManager().toggleTheme(!ThemeManager().isDarkMode);
         } else if (value == 'logout') {
           await FirebaseAuth.instance.signOut();
           if (context.mounted) {
@@ -167,29 +170,45 @@ class _HomePageState extends State<HomePage> {
           }
         }
       },
-      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-        const PopupMenuItem<String>(
-          value: 'profile',
-          child: Row(
-            children: [
-              Icon(Icons.person, color: Colors.black54),
-              SizedBox(width: 12),
-              Text('My Profile'),
-            ],
+      itemBuilder: (BuildContext context) {
+        final isDark = ThemeManager().isDarkMode;
+        return <PopupMenuEntry<String>>[
+          PopupMenuItem<String>(
+            value: 'profile',
+            child: Row(
+              children: [
+                Icon(Icons.person, color: Theme.of(context).iconTheme.color),
+                const SizedBox(width: 12),
+                const Text('My Profile'),
+              ],
+            ),
           ),
-        ),
-        const PopupMenuDivider(),
-        const PopupMenuItem<String>(
-          value: 'logout',
-          child: Row(
-            children: [
-              Icon(Icons.logout, color: Colors.redAccent),
-              SizedBox(width: 12),
-              Text('Logout', style: TextStyle(color: Colors.redAccent)),
-            ],
+          PopupMenuItem<String>(
+            value: 'theme',
+            child: Row(
+              children: [
+                Icon(
+                  isDark ? Icons.light_mode : Icons.dark_mode,
+                  color: isDark ? Colors.orange : Colors.purple,
+                ),
+                const SizedBox(width: 12),
+                Text(isDark ? 'Light Mode' : 'Dark Mode'),
+              ],
+            ),
           ),
-        ),
-      ],
+          const PopupMenuDivider(),
+          const PopupMenuItem<String>(
+            value: 'logout',
+            child: Row(
+              children: [
+                Icon(Icons.logout, color: Colors.redAccent),
+                SizedBox(width: 12),
+                Text('Logout', style: TextStyle(color: Colors.redAccent)),
+              ],
+            ),
+          ),
+        ];
+      },
     );
   }
 
@@ -237,7 +256,7 @@ class _HomePageState extends State<HomePage> {
                   description,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
                     height: 1.4,
                   ),
                 ),

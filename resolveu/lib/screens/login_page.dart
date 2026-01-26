@@ -131,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(Icons.home_work, size: 80, color: Colors.deepPurple),
+                Icon(Icons.home_work, size: 80, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(height: 24),
                 const Text(
                   'HostelSync',
@@ -139,10 +139,10 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Issue Tracking System',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                  style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7)),
                 ),
                 const SizedBox(height: 48),
                 TextFormField(
