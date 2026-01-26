@@ -15,6 +15,15 @@ class FirestoreService {
     }
   }
 
+  Future<void> updateIssue(Issue issue) async {
+    try {
+      await _issuesCollection.doc(issue.id).update(issue.toMap());
+    } catch (e) {
+      debugPrint('Error updating issue: $e');
+      rethrow;
+    }
+  }
+
   Stream<List<Issue>> getIssuesByUserId(String userId) {
     return _issuesCollection
         .where('userId', isEqualTo: userId)
