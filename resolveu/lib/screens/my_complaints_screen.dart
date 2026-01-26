@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import '../models/issue.dart';
 import '../services/firestore_service.dart';
+import 'report_issue_screen.dart';
 
 class MyComplaintsScreen extends StatelessWidget {
   const MyComplaintsScreen({super.key});
@@ -80,53 +81,77 @@ class MyComplaintsScreen extends StatelessWidget {
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    issue.title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ReportIssueScreen(issue: issue),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      issue.title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildStatusChip(issue.status),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                issue.description,
+                style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        _buildInfoChip(context, issue.category, Colors.blue),
+                        const SizedBox(width: 8),
+                        _buildInfoChip(context, issue.urgency, _getUrgencyColor(issue.urgency)),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    DateFormat('MMM d, h:mm a').format(issue.timestamp),
+                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                  ),
+                ],
+              ),
+              if (issue.editedAt != null) ...[
+                const SizedBox(height: 4),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    'Edited at ${DateFormat('MMM d, h:mm a').format(issue.editedAt!)}',
+                    style: TextStyle(fontSize: 10, color: Colors.grey[400], fontStyle: FontStyle.italic),
                   ),
                 ),
-                _buildStatusChip(issue.status),
               ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              issue.description,
-              style: TextStyle(color: Colors.grey[700], fontSize: 14),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    _buildInfoChip(context, issue.category, Colors.blue),
-                    const SizedBox(width: 8),
-                    _buildInfoChip(context, issue.urgency, _getUrgencyColor(issue.urgency)),
-                  ],
-                ),
-                Text(
-                  DateFormat('MMM d, h:mm a').format(issue.timestamp),
-                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

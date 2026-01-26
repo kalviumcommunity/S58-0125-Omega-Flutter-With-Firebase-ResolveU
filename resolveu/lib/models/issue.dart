@@ -7,6 +7,7 @@ class Issue {
   final String urgency;
   final String status;
   final DateTime timestamp;
+  final DateTime? editedAt;
 
   Issue({
     required this.id,
@@ -17,6 +18,7 @@ class Issue {
     required this.urgency,
     required this.status,
     required this.timestamp,
+    this.editedAt,
   });
 
   factory Issue.fromMap(Map<String, dynamic> map, String id) {
@@ -29,6 +31,7 @@ class Issue {
       urgency: map['urgency'] ?? '',
       status: map['status'] ?? '',
       timestamp: DateTime.parse(map['timestamp'] ?? DateTime.now().toIso8601String()),
+      editedAt: map['editedAt'] != null ? DateTime.parse(map['editedAt']) : null,
     );
   }
 
@@ -41,6 +44,7 @@ class Issue {
       'urgency': urgency,
       'status': status,
       'timestamp': timestamp.toIso8601String(),
+      if (editedAt != null) 'editedAt': editedAt!.toIso8601String(),
     };
   }
 }

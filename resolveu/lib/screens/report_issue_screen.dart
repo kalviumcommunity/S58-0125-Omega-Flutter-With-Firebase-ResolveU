@@ -5,7 +5,9 @@ import '../models/issue.dart';
 import '../services/firestore_service.dart';
 
 class ReportIssueScreen extends StatefulWidget {
-  const ReportIssueScreen({super.key});
+  final Issue? issue;
+
+  const ReportIssueScreen({super.key, this.issue});
 
   @override
   State<ReportIssueScreen> createState() => _ReportIssueScreenState();
@@ -21,6 +23,17 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.issue != null) {
+      _titleController.text = widget.issue!.title;
+      _descriptionController.text = widget.issue!.description;
+      _selectedCategory = widget.issue!.category;
+      _selectedUrgency = widget.issue!.urgency;
+    }
+  }
+
+  @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
@@ -31,7 +44,7 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must be logged in to report an issue.')),
+        const SnackBar(content: Text('You must be logged in to report or edit an issue.')),
       );
       return;
     }
@@ -42,29 +55,50 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
       });
 
       try {
-        final issue = Issue(
-          id: const Uuid().v4(),
-          userId: user.uid,
-          title: _titleController.text.trim(),
-          description: _descriptionController.text.trim(),
-          category: _selectedCategory,
-          urgency: _selectedUrgency,
-          status: 'Open', // Default
-          timestamp: DateTime.now(),
-        );
-
-        await _firestoreService.addIssue(issue);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Issue reported successfully!')),
+        if (widget.issue != null) {
+          // Update existing issue
+          final updatedIssue = Issue(
+            id: widget.issue!.id,
+            userId: widget.issue!.userId,
+            title: _titleController.text.trim(),
+            description: _descriptionController.text.trim(),
+            category: _selectedCategory,
+            urgency: _selectedUrgency,
+            status: widget.issue!.status,
+            timestamp: widget.issue!.timestamp,
+            editedAt: DateTime.now(),
           );
-          Navigator.pop(context); // Go back after success
+          await _firestoreService.updateIssue(updatedIssue);
+           if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Issue updated successfully!')),
+            );
+            Navigator.pop(context);
+          }
+        } else {
+          // Create new issue
+          final issue = Issue(
+            id: const Uuid().v4(),
+            userId: user.uid,
+            title: _titleController.text.trim(),
+            description: _descriptionController.text.trim(),
+            category: _selectedCategory,
+            urgency: _selectedUrgency,
+            status: 'Open',
+            timestamp: DateTime.now(),
+          );
+          await _firestoreService.addIssue(issue);
+           if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Issue reported successfully!')),
+            );
+            Navigator.pop(context);
+          }
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error reporting issue: $e')),
+            SnackBar(content: Text('Error: $e')),
           );
         }
       } finally {
@@ -79,9 +113,10 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.issue != null;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Report an Issue'),
+        title: Text(isEditing ? 'Edit Issue' : 'Report an Issue'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -178,7 +213,7 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Submit Issue'),
+                      : Text(isEditing ? 'Update Issue' : 'Submit Issue'),
                 ),
               ],
             ),
