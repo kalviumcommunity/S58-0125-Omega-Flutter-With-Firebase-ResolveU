@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'login_page.dart';
 import 'report_issue_screen.dart';
 import 'profile_screen.dart';
+import 'faq_screen.dart';
 import '../theme_manager.dart';
 
 class HomePage extends StatefulWidget {
@@ -13,13 +14,25 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
+      extendBody: false,
       appBar: AppBar(
-        title: const Text('HostelSync', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          _selectedIndex == 0 ? 'HostelSync' : 'Help Center', 
+          style: const TextStyle(fontWeight: FontWeight.bold)
+        ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         elevation: 0,
         automaticallyImplyLeading: false,
@@ -27,117 +40,176 @@ class _HomePageState extends State<HomePage> {
           _buildProfileMenu(context),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Welcome Section with Gradient
-            Container(
-              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 40, top: 20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Theme.of(context).colorScheme.inversePrimary,
-                    Theme.of(context).colorScheme.surface,
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Welcome back, ${user?.email?.split('@')[0] ?? 'Student'}! 👋',
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Have an issue? We are here to resolve it.',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'About HostelSync',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildInfoCard(
-                    context,
-                    icon: Icons.apartment,
-                    title: 'Your Home Away From Home',
-                    description:
-                        'HostelSync is dedicated to providing a comfortable and safe living environment for all students. We strive to maintain high standards of cleanliness and facility management.',
-                  ),
-
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Community Guidelines',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildInfoCard(
-                    context,
-                    icon: Icons.volume_off,
-                    title: 'Quiet Hours',
-                    description:
-                        'Please respect quiet hours from 10:00 PM to 7:00 AM to ensure everyone gets a good night\'s rest.',
-                  ),
-                  const SizedBox(height: 12),
-                  _buildInfoCard(
-                    context,
-                    icon: Icons.cleaning_services,
-                    title: 'Cleanliness',
-                    description:
-                        'Help us keep the hostel clean. Please dispose of trash in designated bins and report any maintenance issues promptly.',
-                  ),
-                  const SizedBox(height: 12),
-                  _buildInfoCard(
-                    context,
-                    icon: Icons.security,
-                    title: 'Safety',
-                    description:
-                        'Do not share your access card or keys. Report any suspicious activity to the administration immediately.',
-                  ),
-                ],
-              ),
-            ),
-             const SizedBox(height: 80), // Space for FAB
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
+      body: _selectedIndex == 0
+          ? _buildHomeBody(context, user)
+          : const FaqScreen(),
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ReportIssueScreen()),
           );
         },
-        icon: const Icon(Icons.add_comment_rounded),
-        label: const Text('Report Issue'),
         elevation: 4,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add_comment_rounded, size: 28),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8.0,
+        color: Theme.of(context).colorScheme.surface,
+        elevation: 10,
+        child: SizedBox(
+          height: 60,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(0, Icons.home_rounded, 'Home'),
+              const SizedBox(width: 48), // Space for FAB
+              _buildNavItem(1, Icons.help_outline_rounded, 'FAQ'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData icon, String label) {
+    final isSelected = _selectedIndex == index;
+    // Use the primary color for selected, and a distinct but simpler color for unselected.
+    final selectedColor = Theme.of(context).colorScheme.primary;
+    final unselectedColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.6);
+
+    return InkWell(
+      onTap: () => _onItemTapped(index),
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? selectedColor : unselectedColor,
+              size: 28,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                color: isSelected ? selectedColor : unselectedColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHomeBody(BuildContext context, User? user) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Welcome Section with Gradient
+          Container(
+            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 40, top: 20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.inversePrimary,
+                  Theme.of(context).colorScheme.surface,
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Welcome back, ${user?.email?.split('@')[0] ?? 'Student'}! 👋',
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Have an issue? We are here to resolve it.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'About HostelSync',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildInfoCard(
+                  context,
+                  icon: Icons.apartment,
+                  title: 'Your Home Away From Home',
+                  description:
+                      'HostelSync is dedicated to providing a comfortable and safe living environment for all students. We strive to maintain high standards of cleanliness and facility management.',
+                ),
+
+                const SizedBox(height: 24),
+                const Text(
+                  'Community Guidelines',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildInfoCard(
+                  context,
+                  icon: Icons.volume_off,
+                  title: 'Quiet Hours',
+                  description:
+                      'Please respect quiet hours from 10:00 PM to 7:00 AM to ensure everyone gets a good night\'s rest.',
+                ),
+                const SizedBox(height: 12),
+                _buildInfoCard(
+                  context,
+                  icon: Icons.cleaning_services,
+                  title: 'Cleanliness',
+                  description:
+                      'Help us keep the hostel clean. Please dispose of trash in designated bins and report any maintenance issues promptly.',
+                ),
+                const SizedBox(height: 12),
+                _buildInfoCard(
+                  context,
+                  icon: Icons.security,
+                  title: 'Safety',
+                  description:
+                      'Do not share your access card or keys. Report any suspicious activity to the administration immediately.',
+                ),
+              ],
+            ),
+          ),
+           const SizedBox(height: 100), // Extra space for FAB and BottomBar
+        ],
       ),
     );
   }
