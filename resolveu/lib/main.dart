@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 import 'screens/login_page.dart';
+import 'screens/onboarding_screen.dart';
 import 'theme_manager.dart';
 
 void main() async {
@@ -9,12 +11,18 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
+  final prefs = await SharedPreferences.getInstance();
+  final seenOnboarding = prefs.getBool('seenOnboarding') ?? false;
+
   print('Firebase initialized successfully');
-  runApp(const MyApp());
+  runApp(MyApp(seenOnboarding: seenOnboarding));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool seenOnboarding;
+
+  const MyApp({super.key, required this.seenOnboarding});
 
   // This widget is the root of your application.
   @override
@@ -37,7 +45,7 @@ class MyApp extends StatelessWidget {
             ),
             useMaterial3: true,
           ),
-          home: const LoginPage(),
+          home: seenOnboarding ? const LoginPage() : const OnboardingScreen(),
           builder: (context, child) {
             return LayoutBuilder(
               builder: (context, constraints) {
