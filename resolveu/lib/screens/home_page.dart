@@ -234,11 +234,31 @@ class _HomePageState extends State<HomePage> {
         } else if (value == 'theme') {
           ThemeManager().toggleTheme(!ThemeManager().isDarkMode);
         } else if (value == 'logout') {
-          await FirebaseAuth.instance.signOut();
-          if (context.mounted) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const LoginPage()),
-            );
+          final shouldLogout = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Logout Confirmation'),
+              content: const Text('Are you sure you want to log out?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Logout', style: TextStyle(color: Colors.red)),
+                ),
+              ],
+            ),
+          );
+
+          if (shouldLogout == true) {
+            await FirebaseAuth.instance.signOut();
+            if (context.mounted) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            }
           }
         }
       },
