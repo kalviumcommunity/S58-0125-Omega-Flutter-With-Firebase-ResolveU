@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_page.dart';
 import 'report_issue_screen.dart';
 import 'profile_screen.dart';
 import 'faq_screen.dart';
 import '../theme_manager.dart';
+import '../widgets/gradient_background.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,23 +28,22 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
-    return Scaffold(
-      extendBody: false,
+    return GradientBackground(
+      extendBody: true, // Allow content to go behind FAB/Nav
+      extendBodyBehindAppBar: true, 
       appBar: AppBar(
         title: Text(
           _selectedIndex == 0 ? 'ResolveU' : 'Help Center', 
           style: const TextStyle(fontWeight: FontWeight.bold)
         ),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Colors.transparent, // Transparent to show gradient
         elevation: 0,
         automaticallyImplyLeading: false,
         actions: [
           _buildProfileMenu(context),
         ],
       ),
-      body: _selectedIndex == 0
-          ? _buildHomeBody(context, user)
-          : const FaqScreen(),
+      // Pass FAB and BottomBar to GradientBackground (which passes to Scaffold)
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -58,8 +59,9 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
-        color: Theme.of(context).colorScheme.surface,
+        color: Theme.of(context).cardTheme.color, // Use card color
         elevation: 10,
+        clipBehavior: Clip.antiAlias,
         child: SizedBox(
           height: 60,
           child: Row(
@@ -72,6 +74,9 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+      child: _selectedIndex == 0
+          ? _buildHomeBody(context, user)
+          : const FaqScreen(),
     );
   }
 
@@ -115,19 +120,10 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Welcome Section with Gradient
+          // Welcome Section
           Container(
-            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 40, top: 20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).colorScheme.inversePrimary,
-                  Theme.of(context).colorScheme.surface,
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            // Removed inner gradient to let global gradient show
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -154,58 +150,96 @@ class _HomePageState extends State<HomePage> {
 
           Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'About ResolveU',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+            child: AnimationLimiter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'About ResolveU',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                _buildInfoCard(
-                  context,
-                  icon: Icons.apartment,
-                  title: 'Your Home Away From Home',
-                  description:
-                      'ResolveU is dedicated to providing a comfortable and safe living environment for all students. We strive to maintain high standards of cleanliness and facility management.',
-                ),
+                  const SizedBox(height: 12),
+                  AnimationConfiguration.staggeredList(
+                    position: 0,
+                    duration: const Duration(milliseconds: 375),
+                    child: SlideAnimation(
+                      verticalOffset: 50.0,
+                      child: FadeInAnimation(
+                        child: _buildInfoCard(
+                          context,
+                          icon: Icons.apartment,
+                          title: 'Your Home Away From Home',
+                          description:
+                              'ResolveU is dedicated to providing a comfortable and safe living environment for all students. We strive to maintain high standards of cleanliness and facility management.',
+                        ),
+                      ),
+                    ),
+                  ),
 
-                const SizedBox(height: 24),
-                const Text(
-                  'Community Guidelines',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Community Guidelines',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                _buildInfoCard(
-                  context,
-                  icon: Icons.volume_off,
-                  title: 'Quiet Hours',
-                  description:
-                      'Please respect quiet hours from 10:00 PM to 7:00 AM to ensure everyone gets a good night\'s rest.',
-                ),
-                const SizedBox(height: 12),
-                _buildInfoCard(
-                  context,
-                  icon: Icons.cleaning_services,
-                  title: 'Cleanliness',
-                  description:
-                      'Help us keep the hostel clean. Please dispose of trash in designated bins and report any maintenance issues promptly.',
-                ),
-                const SizedBox(height: 12),
-                _buildInfoCard(
-                  context,
-                  icon: Icons.security,
-                  title: 'Safety',
-                  description:
-                      'Do not share your access card or keys. Report any suspicious activity to the administration immediately.',
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  AnimationConfiguration.staggeredList(
+                    position: 1,
+                    duration: const Duration(milliseconds: 375),
+                    child: SlideAnimation(
+                      verticalOffset: 50.0,
+                      child: FadeInAnimation(
+                        child: _buildInfoCard(
+                          context,
+                          icon: Icons.volume_off,
+                          title: 'Quiet Hours',
+                          description:
+                              'Please respect quiet hours from 10:00 PM to 7:00 AM to ensure everyone gets a good night\'s rest.',
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  AnimationConfiguration.staggeredList(
+                    position: 2,
+                    duration: const Duration(milliseconds: 375),
+                    child: SlideAnimation(
+                      verticalOffset: 50.0,
+                      child: FadeInAnimation(
+                        child: _buildInfoCard(
+                          context,
+                          icon: Icons.cleaning_services,
+                          title: 'Cleanliness',
+                          description:
+                              'Help us keep the hostel clean. Please dispose of trash in designated bins and report any maintenance issues promptly.',
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  AnimationConfiguration.staggeredList(
+                    position: 3,
+                    duration: const Duration(milliseconds: 375),
+                    child: SlideAnimation(
+                      verticalOffset: 50.0,
+                      child: FadeInAnimation(
+                        child: _buildInfoCard(
+                          context,
+                          icon: Icons.security,
+                          title: 'Safety',
+                          description:
+                              'Do not share your access card or keys. Report any suspicious activity to the administration immediately.',
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
            const SizedBox(height: 100), // Extra space for FAB and BottomBar
@@ -309,16 +343,21 @@ class _HomePageState extends State<HomePage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
+          Theme.of(context).cardTheme.shadowColor != null 
+             ? BoxShadow(
+                color: Theme.of(context).cardTheme.shadowColor!,
+                blurRadius: 20,
+                offset: const Offset(0, 4),
+               )
+             : BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 20,
+                offset: const Offset(0, 4),
+             ),
         ],
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

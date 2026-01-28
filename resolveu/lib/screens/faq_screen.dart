@@ -5,29 +5,21 @@ class FaqScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // We don't need an AppBar here if the main HomePage has one or if we want a clean look.
-      // However, usually inner screens might want one. 
-      // Given the persistent bottom nav, the AppBar typically stays or changes title.
-      // Let's rely on the HomePage's scaffold to provide the body, 
-      // but if we want a distinct header for FAQ, we can add it here or in the body.
-      // The prompt says "Persistent bottom navigation pattern so the navigation bar remains visible".
-      // Usually this means the AppBar also changes or stays.
-      // Let's implement just the body content here.
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: const [
-           Padding(
-            padding: EdgeInsets.only(bottom: 20.0),
-            child: Text(
-              'Frequently Asked Questions',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: const [
+         Padding(
+          padding: EdgeInsets.only(bottom: 20.0),
+          child: Text(
+            'Frequently Asked Questions',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          ExpansionTile(
+        ),
+        Card(
+          child: ExpansionTile(
             title: Text('How do I report a maintenance issue?'),
             children: [
               Padding(
@@ -38,7 +30,10 @@ class FaqScreen extends StatelessWidget {
               ),
             ],
           ),
-          ExpansionTile(
+        ),
+        SizedBox(height: 8),
+        Card(
+          child: ExpansionTile(
             title: Text('What are the hostel quiet hours?'),
             children: [
               Padding(
@@ -49,7 +44,10 @@ class FaqScreen extends StatelessWidget {
               ),
             ],
           ),
-          ExpansionTile(
+        ),
+        SizedBox(height: 8),
+        Card(
+          child: ExpansionTile(
             title: Text('How can I check the status of my complaint?'),
             children: [
               Padding(
@@ -60,7 +58,10 @@ class FaqScreen extends StatelessWidget {
               ),
             ],
           ),
-          ExpansionTile(
+        ),
+        SizedBox(height: 8),
+        Card(
+          child: ExpansionTile(
             title: Text('What should I do in an emergency?'),
             children: [
               Padding(
@@ -71,7 +72,10 @@ class FaqScreen extends StatelessWidget {
               ),
             ],
           ),
-          ExpansionTile(
+        ),
+        SizedBox(height: 8),
+        Card(
+          child: ExpansionTile(
             title: Text('Can I request a room change?'),
             children: [
               Padding(
@@ -82,7 +86,10 @@ class FaqScreen extends StatelessWidget {
               ),
             ],
           ),
-          ExpansionTile(
+        ),
+        SizedBox(height: 8),
+        Card(
+          child: ExpansionTile(
             title: Text('How do I reset my password?'),
             children: [
               Padding(
@@ -93,8 +100,8 @@ class FaqScreen extends StatelessWidget {
               ),
             ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
