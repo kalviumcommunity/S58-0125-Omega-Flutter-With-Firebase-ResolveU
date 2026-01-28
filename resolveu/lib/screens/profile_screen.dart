@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'my_complaints_screen.dart';
+import '../widgets/gradient_background.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -20,23 +21,25 @@ class ProfileScreen extends StatelessWidget {
     // Default display name logic
     final String displayName = user.displayName ?? user.email?.split('@')[0] ?? 'User';
 
-    return Scaffold(
+    return GradientBackground(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('My Profile'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text('My Profile', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
       ),
-      body: SingleChildScrollView(
+      child: SingleChildScrollView(
         child: Column(
           children: [
             // Header Section with Gradient
             Container(
-              padding: const EdgeInsets.only(top: 20, bottom: 40),
+              padding: const EdgeInsets.only(top: 100, bottom: 40), // Adjusted top padding for transparent AppBar
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                    Theme.of(context).colorScheme.secondary.withOpacity(0.8),
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.secondary,
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -45,24 +48,38 @@ class ProfileScreen extends StatelessWidget {
                   bottomLeft: Radius.circular(30),
                   bottomRight: Radius.circular(30),
                 ),
+                boxShadow: [
+                   BoxShadow(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                   )
+                ]
               ),
               child: Center(
                 child: Column(
                   children: [
-                    CircleAvatar(
-                      radius: 60,
-                      backgroundColor: Colors.white,
-                      backgroundImage: user.photoURL != null ? NetworkImage(user.photoURL!) : null,
-                      child: user.photoURL == null
-                          ? Text(
-                              displayName[0].toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 48,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            )
-                          : null,
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: CircleAvatar(
+                        radius: 56,
+                        backgroundColor: Colors.white,
+                        backgroundImage: user.photoURL != null ? NetworkImage(user.photoURL!) : null,
+                        child: user.photoURL == null
+                            ? Text(
+                                displayName[0].toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              )
+                            : null,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -79,11 +96,12 @@ class ProfileScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.white.withOpacity(0.3)),
                       ),
                       child: Text(
                         user.email ?? 'No Email',
                         style: const TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
                         ),
@@ -100,7 +118,7 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildMyComplaintsButton(context),
+                   _buildMyComplaintsButton(context),
                   const SizedBox(height: 24),
                   Text(
                     'Account Details',
@@ -154,7 +172,7 @@ class ProfileScreen extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                      color: Colors.white.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
@@ -165,7 +183,7 @@ class ProfileScreen extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.shield_outlined, color: Theme.of(context).colorScheme.primary),
+                            Icon(Icons.shield_rounded, color: Theme.of(context).colorScheme.primary),
                             const SizedBox(width: 8),
                             const Text(
                               'Security Check',
@@ -256,11 +274,7 @@ class ProfileScreen extends StatelessWidget {
     VoidCallback? onTap,
   }) {
     return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.withOpacity(0.2)),
-      ),
+      // Elevation from Theme (4)
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
         onTap: onTap,

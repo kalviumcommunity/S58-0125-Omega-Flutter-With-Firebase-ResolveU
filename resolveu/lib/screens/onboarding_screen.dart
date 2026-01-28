@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
+import '../widgets/gradient_background.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -33,8 +35,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
+    return GradientBackground(
+      child: SafeArea(
         child: Column(
           children: [
             Expanded(
@@ -147,35 +149,43 @@ class OnboardingContentWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Spacer(),
-        Icon(
-          content.icon,
-          size: 150,
-          color: Theme.of(context).primaryColor,
-        ),
-        const SizedBox(height: 40),
-        Text(
-          content.title,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+    return AnimationConfiguration.synchronized(
+      duration: const Duration(milliseconds: 500),
+      child: SlideAnimation(
+        verticalOffset: 50.0,
+        child: FadeInAnimation(
+          child: Column(
+            children: [
+              const Spacer(),
+              Icon(
+                content.icon,
+                size: 150,
+                color: Theme.of(context).primaryColor,
               ),
-        ),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Text(
-            content.description,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[600],
+              const SizedBox(height: 40),
+              Text(
+                content.title,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Text(
+                  content.description,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.grey[600],
+                      ),
                 ),
+              ),
+              const Spacer(),
+            ],
           ),
         ),
-        const Spacer(),
-      ],
+      ),
     );
   }
 }

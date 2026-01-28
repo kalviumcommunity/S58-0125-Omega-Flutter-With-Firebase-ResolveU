@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../models/issue.dart';
 import '../services/firestore_service.dart';
 import 'report_issue_screen.dart';
+import '../widgets/gradient_background.dart';
 
 enum SortOption {
   newestFirst,
@@ -35,10 +36,13 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
 
     final firestoreService = FirestoreService();
 
-    return Scaffold(
+    return GradientBackground(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('My Complaints'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('My Complaints', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent, // Let gradient show or use Theme
+        elevation: 0,
+        centerTitle: true,
         actions: [
           PopupMenuButton<SortOption>(
             icon: const Icon(Icons.sort),
@@ -70,7 +74,7 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
           ),
         ],
       ),
-      body: StreamBuilder<List<Issue>>(
+      child: StreamBuilder<List<Issue>>(
         stream: firestoreService.getIssuesByUserId(user.uid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -150,9 +154,9 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
 
   Widget _buildIssueCard(BuildContext context, Issue issue) {
     return Card(
-      elevation: 2,
+      // Elevation from Theme
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      // Shape from Theme
       child: InkWell(
         onTap: () {
           Navigator.push(
