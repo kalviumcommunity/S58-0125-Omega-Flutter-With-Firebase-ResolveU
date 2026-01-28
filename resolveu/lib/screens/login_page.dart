@@ -134,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                 Icon(Icons.home_work, size: 80, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(height: 24),
                 const Text(
-                  'HostelSync',
+                  'ResolveU',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                 ),

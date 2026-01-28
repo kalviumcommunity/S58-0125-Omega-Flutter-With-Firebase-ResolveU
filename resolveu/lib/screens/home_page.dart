@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
       extendBody: false,
       appBar: AppBar(
         title: Text(
-          _selectedIndex == 0 ? 'HostelSync' : 'Help Center', 
+          _selectedIndex == 0 ? 'ResolveU' : 'Help Center', 
           style: const TextStyle(fontWeight: FontWeight.bold)
         ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -158,7 +158,7 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'About HostelSync',
+                  'About ResolveU',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -170,7 +170,7 @@ class _HomePageState extends State<HomePage> {
                   icon: Icons.apartment,
                   title: 'Your Home Away From Home',
                   description:
-                      'HostelSync is dedicated to providing a comfortable and safe living environment for all students. We strive to maintain high standards of cleanliness and facility management.',
+                      'ResolveU is dedicated to providing a comfortable and safe living environment for all students. We strive to maintain high standards of cleanliness and facility management.',
                 ),
 
                 const SizedBox(height: 24),

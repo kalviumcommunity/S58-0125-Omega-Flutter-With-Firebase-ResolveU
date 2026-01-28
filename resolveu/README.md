@@ -1,4 +1,4 @@
-# ResolveU - HostelSync
+# ResolveU
 
 A Flutter application for hostel issue tracking and resolution. Students can report and track issues related to mess, maintenance, and facilities.
 
