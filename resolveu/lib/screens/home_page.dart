@@ -7,6 +7,7 @@ import 'profile_screen.dart';
 import 'faq_screen.dart';
 import '../theme_manager.dart';
 import '../widgets/gradient_background.dart';
+import 'dart:async'; // For auto-scrolling carousel
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,6 +18,47 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+  final PageController _pageController = PageController();
+  int _currentHeroPage = 0;
+  Timer? _timer;
+
+  final List<String> _heroImages = [
+    'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80', // Lounge/Common
+    'https://images.unsplash.com/photo-1596276122653-651a3898309f?auto=format&fit=crop&w=800&q=80', // Room
+    'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', // Workspace
+    'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=800&q=80', // Exterior
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _startAutoScroll();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _startAutoScroll() {
+    _timer = Timer.periodic(const Duration(seconds: 5), (Timer timer) {
+      if (_currentHeroPage < _heroImages.length - 1) {
+        _currentHeroPage++;
+      } else {
+        _currentHeroPage = 0;
+      }
+
+      if (_pageController.hasClients) {
+        _pageController.animateToPage(
+          _currentHeroPage,
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.fastOutSlowIn,
+        );
+      }
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -32,9 +74,17 @@ class _HomePageState extends State<HomePage> {
       extendBody: true, // Allow content to go behind FAB/Nav
       extendBodyBehindAppBar: true, 
       appBar: AppBar(
-        title: Text(
-          _selectedIndex == 0 ? 'ResolveU' : 'Help Center', 
-          style: const TextStyle(fontWeight: FontWeight.bold)
+        title: Row(
+          children: [
+            if (_selectedIndex == 0) ...[
+              Icon(Icons.home_work_rounded, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(width: 10),
+            ],
+            Text(
+              _selectedIndex == 0 ? 'ResolveU' : 'Help Center',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
         backgroundColor: Colors.transparent, // Transparent to show gradient
         elevation: 0,
@@ -121,32 +171,8 @@ class _HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Welcome Section
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            // Removed inner gradient to let global gradient show
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Welcome back, ${user?.email?.split('@')[0] ?? 'Student'}! 👋',
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Have an issue? We are here to resolve it.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // Hero Section (Replaces simple Welcome)
+          _buildHeroSection(context, user),
 
           Padding(
             padding: const EdgeInsets.all(20.0),
@@ -243,6 +269,129 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
            const SizedBox(height: 100), // Extra space for FAB and BottomBar
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroSection(BuildContext context, User? user) {
+    return SizedBox(
+      height: 320, // Taller for better impact
+      child: Stack(
+        children: [
+          PageView.builder(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                _currentHeroPage = index;
+              });
+            },
+            itemCount: _heroImages.length,
+            itemBuilder: (context, index) {
+              return Image.network(
+                _heroImages[index],
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                          : null,
+                      color: Colors.white,
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Colors.grey.shade900,
+                    child: const Center(child: Icon(Icons.image_not_supported, color: Colors.white54, size: 50)),
+                  );
+                },
+              );
+            },
+          ),
+          // Gradient Overlay
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withOpacity(0.3), // Slight dark at top for AppBar visibility
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.8), // Dark at bottom for text
+                ],
+                stops: const [0.0, 0.4, 1.0],
+              ),
+            ),
+          ),
+          // Content
+          Positioned(
+            bottom: 30,
+            left: 20,
+            right: 20,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Welcome back, ${user?.email?.split('@')[0] ?? 'Student'}! 👋',
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: -0.5,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(0, 2),
+                        blurRadius: 4.0,
+                        color: Colors.black45,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Your comfort, safe and sound.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white.withOpacity(0.95),
+                    fontWeight: FontWeight.w500,
+                    shadows: const [
+                       Shadow(
+                        offset: Offset(0, 1),
+                        blurRadius: 2.0,
+                        color: Colors.black45,
+                      ),
+                    ]
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Indicators
+          Positioned(
+            bottom: 30,
+            right: 20,
+            child: Row(
+              children: List.generate(_heroImages.length, (index) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: const EdgeInsets.only(left: 6),
+                  width: _currentHeroPage == index ? 24 : 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    color: _currentHeroPage == index
+                        ? Theme.of(context).primaryColor // Use primary color for active
+                        : Colors.white.withOpacity(0.5),
+                  ),
+                );
+              }),
+            ),
+          )
         ],
       ),
     );
